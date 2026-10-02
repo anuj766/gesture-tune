@@ -11,11 +11,9 @@ interface SoundWaveVisualizerProps {
 
 export function SoundWaveVisualizer({
   active,
-  instrumentId,
-  barCount = 24,
+  barCount = 20,
 }: SoundWaveVisualizerProps) {
-  const isSitar = instrumentId === 'sitar';
-  const [heights, setHeights] = useState<number[]>(Array(barCount).fill(15));
+  const [heights, setHeights] = useState<number[]>(Array(barCount).fill(10));
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -24,15 +22,14 @@ export function SoundWaveVisualizer({
       interval = setInterval(() => {
         setHeights(
           Array.from({ length: barCount }, (_, i) => {
-            // Harmonic wave physics logic
             const centerFactor = 1 - Math.abs(i - barCount / 2) / (barCount / 2);
-            const randomH = Math.random() * 75 + 25;
-            return Math.min(100, Math.max(18, randomH * (0.5 + centerFactor * 0.5)));
+            const randomH = Math.random() * 65 + 20;
+            return Math.min(100, Math.max(12, randomH * (0.4 + centerFactor * 0.6)));
           })
         );
-      }, 70);
+      }, 80);
     } else {
-      setHeights(Array(barCount).fill(12));
+      setHeights(Array(barCount).fill(8));
     }
 
     return () => {
@@ -41,19 +38,30 @@ export function SoundWaveVisualizer({
   }, [active, barCount]);
 
   return (
-    <div className="flex items-center justify-center gap-1.5 h-14 my-3 px-4 py-2 rounded-xl bg-slate-950/40 border border-white/5 backdrop-blur-md">
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '3px',
+        height: '32px',
+        padding: '0 12px',
+        borderRadius: '6px',
+        background: 'var(--surface-inset)',
+        border: '1px solid var(--separator-subtle)',
+      }}
+    >
       {heights.map((h, idx) => (
         <motion.div
           key={idx}
           animate={{ height: `${h}%` }}
-          transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-          className={`w-1.5 rounded-full transition-colors duration-300 ${
-            active
-              ? isSitar
-                ? 'bg-gradient-to-t from-amber-600 via-[#f59e0b] to-[#fcd34d] shadow-[0_0_8px_rgba(245,158,11,0.6)]'
-                : 'bg-gradient-to-t from-cyan-600 via-violet-500 to-pink-400 shadow-[0_0_8px_rgba(0,243,255,0.6)]'
-              : 'bg-slate-800/60'
-          }`}
+          transition={{ duration: 0.1 }}
+          style={{
+            width: '2px',
+            borderRadius: '2px',
+            background: active ? 'var(--green)' : 'var(--label-4)',
+            transition: 'background 0.2s',
+          }}
         />
       ))}
     </div>

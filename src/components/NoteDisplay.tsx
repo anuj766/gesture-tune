@@ -4,72 +4,117 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ActiveNoteInfo } from '@/types';
 import { Music } from 'lucide-react';
 
-import { getThemeConfig } from '@/lib/theme';
-
 interface NoteDisplayProps {
   activeNotes: ActiveNoteInfo[];
   instrumentId?: string;
 }
 
-export function NoteDisplay({ activeNotes, instrumentId }: NoteDisplayProps) {
-  const theme = getThemeConfig(instrumentId);
-  const isSitar = instrumentId === 'sitar';
+export function NoteDisplay({ activeNotes }: NoteDisplayProps) {
+  const count = activeNotes.length;
 
   return (
-    <div className={`w-full rounded-2xl p-5 backdrop-blur-xl transition-all duration-700 ease-in-out ${theme.cardBg} border ${theme.cardBorder} ${theme.cardGlow}`}>
-      <div className={`flex items-center justify-between mb-3 pb-2 border-b ${
-        isSitar ? 'border-[#d4af37]/30' : 'border-slate-800/80'
-      }`}>
-        <div className="flex items-center gap-2">
-          <Music className={`w-4 h-4 ${theme.accentText}`} />
-          <span className={`text-xs font-mono font-bold tracking-widest uppercase ${theme.accentText}`}>
-            Active Tone Matrix
-          </span>
-        </div>
-        <span className="text-xs font-mono text-slate-400">
-          {activeNotes.length} Note{activeNotes.length !== 1 ? 's' : ''} Active
+    <div className="flex flex-col gap-2.5">
+      {/* Section Title */}
+      <div className="flex items-center justify-between">
+        <span className="mac-section-title">Active Notes</span>
+        <span
+          style={{
+            fontSize: '11px',
+            fontWeight: 500,
+            color: count > 0 ? 'var(--apple-green)' : 'var(--text-tertiary)',
+            background: count > 0 ? 'var(--apple-green-bg)' : 'transparent',
+            padding: count > 0 ? '1px 6px' : '0',
+            borderRadius: '10px',
+          }}
+        >
+          {count > 0 ? `${count} sounding` : '0 sounding'}
         </span>
       </div>
 
-      <div className="flex flex-wrap gap-2.5 min-h-[52px] items-center">
-        <AnimatePresence>
-          {activeNotes.length === 0 ? (
-            <motion.p
+      {/* Note Pills Container */}
+      <div
+        style={{
+          minHeight: '62px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '8px',
+          alignItems: 'center',
+          padding: '8px 10px',
+          background: 'var(--surface-inset)',
+          borderRadius: '10px',
+        }}
+      >
+        <AnimatePresence mode="popLayout">
+          {count === 0 ? (
+            <motion.div
+              key="empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-xs font-mono text-slate-500 italic w-full text-center py-2"
+              style={{
+                width: '100%',
+                textAlign: 'center',
+                padding: '6px 0',
+                color: 'var(--text-tertiary)',
+                fontSize: '12.5px',
+                fontWeight: 400,
+              }}
             >
-              No notes triggered. Extend fingers on either hand.
-            </motion.p>
+              Extend fingers to sound notes
+            </motion.div>
           ) : (
-            activeNotes.map((item) => {
-              const isLeft = item.hand === 'Left';
-              return (
-                <motion.div
-                  key={`${item.hand}-${item.finger}-${item.note}`}
-                  initial={{ scale: 0.6, opacity: 0, y: 10 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.6, opacity: 0, y: -10 }}
-                  transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-mono font-bold border transition-all ${
-                    isLeft
-                      ? 'bg-cyan-500/20 text-cyan-200 border-cyan-400/50 shadow-[0_0_15px_rgba(0,243,255,0.3)]'
-                      : 'bg-pink-500/20 text-pink-200 border-pink-400/50 shadow-[0_0_15px_rgba(255,0,127,0.3)]'
-                  }`}
+            activeNotes.map((item) => (
+              <motion.div
+                key={`${item.hand}-${item.finger}-${item.note}`}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.12 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '7px',
+                  padding: '5px 11px',
+                  borderRadius: '8px',
+                  background: '#ffffff',
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05), 0 0 1px rgba(0, 0, 0, 0.08)',
+                }}
+              >
+                <div
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    background: 'var(--apple-green)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff',
+                    flexShrink: 0,
+                  }}
                 >
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      isLeft ? 'bg-cyan-400 shadow-[0_0_8px_#00f3ff]' : 'bg-pink-400 shadow-[0_0_8px_#ff007f]'
-                    }`}
-                  />
-                  <span className="text-base tracking-tight">{item.note}</span>
-                  <span className="text-[10px] opacity-75 font-normal capitalize">
-                    ({item.hand[0]}•{item.finger})
-                  </span>
-                </motion.div>
-              );
-            })
+                  <Music style={{ width: '10px', height: '10px' }} />
+                </div>
+                <span
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: 'var(--text-primary)',
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  {item.note}
+                </span>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--text-tertiary)',
+                  }}
+                >
+                  {item.hand[0]} · {item.finger}
+                </span>
+              </motion.div>
+            ))
           )}
         </AnimatePresence>
       </div>

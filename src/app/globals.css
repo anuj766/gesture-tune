@@ -1,37 +1,271 @@
 @import "tailwindcss";
 
-@layer utilities {
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.97);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
+/* ─────────────────────────────────────────
+   Apple macOS Creative Application Design System
+   Grounded in native macOS & Apple Human Interface Guidelines
+───────────────────────────────────────── */
 
-  .animate-fade-in {
-    animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
+:root {
+  /* Ambient backdrop behind window */
+  --app-backdrop:    #ebedf0;
+
+  /* macOS Window & surfaces */
+  --window-bg:       #ffffff;
+  --sidebar-bg:      #fafafc;
+  --canvas-bg:       #0e0e11;
+  --surface-inset:   #f2f3f6;
+  --surface-hover:   #eaebee;
+  --surface-pressed: #e2e4e8;
+
+  /* Separators — ultra-subtle hairlines */
+  --separator:        rgba(0, 0, 0, 0.07);
+  --separator-subtle: rgba(0, 0, 0, 0.04);
+  --border-dark:      rgba(255, 255, 255, 0.10);
+
+  /* Apple San Francisco Typography */
+  --text-primary:    #1d1d1f;   /* Titles, active items, bold text */
+  --text-secondary:  #515154;   /* Body labels, secondary values */
+  --text-tertiary:   #86868b;   /* Section headers, captions, inactive days */
+  --text-quaternary: #c7c7cc;   /* Disabled states, placeholders */
+
+  /* Functional State Colors */
+  --apple-green:       #34c759;
+  --apple-green-hover: #30b753;
+  --apple-green-bg:    rgba(52, 199, 89, 0.12);
+  --apple-green-glow:  rgba(52, 199, 89, 0.35);
+
+  --apple-amber:       #ff9f0a;
+  --apple-amber-bg:    rgba(255, 159, 10, 0.12);
+
+  --apple-red:         #ff3b30;
+  --apple-red-bg:      rgba(255, 59, 48, 0.12);
+
+  /* Traffic lights */
+  --traffic-close:    #ff5f56;
+  --traffic-minimize: #ffbd2e;
+  --traffic-maximize: #27c93f;
+
+  /* macOS Radii */
+  --radius-window:   18px;
+  --radius-panel:    14px;
+  --radius-canvas:   14px;
+  --radius-control:  8px;
+  --radius-capsule:  100px;
+
+  /* Aliases for backwards compatibility */
+  --bg:              var(--app-backdrop);
+  --surface:         var(--window-bg);
+  --label:           var(--text-primary);
+  --label-2:         var(--text-secondary);
+  --label-3:         var(--text-tertiary);
+  --green:           var(--apple-green);
+  --green-bg:        var(--apple-green-bg);
+  --amber:           var(--apple-amber);
+  --red:             var(--apple-red);
 }
 
-/* Custom Glassmorphism Scrollbar */
+/* ─── Global Reset & Typography ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--app-backdrop);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Inter", -apple-system-body, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── macOS Window Frame ─── */
+.macos-window {
+  background: var(--window-bg);
+  border-radius: var(--radius-window);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 24px 64px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.03),
+    0 0 1px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+/* ─── macOS Native Controls ─── */
+.mac-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: var(--radius-control);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--surface-inset);
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.12s ease;
+  -webkit-user-select: none;
+}
+
+.mac-btn:hover {
+  background: var(--surface-hover);
+  color: #000000;
+}
+
+.mac-btn:active {
+  background: var(--surface-pressed);
+  transform: scale(0.99);
+}
+
+.mac-btn.active {
+  background: var(--text-primary);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.mac-btn.active:hover {
+  background: #2c2c2e;
+  color: #ffffff;
+}
+
+/* macOS Select / Dropdown */
+.mac-select {
+  height: 30px;
+  padding: 0 24px 0 10px;
+  border-radius: var(--radius-control);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--surface-inset);
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2386868B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  border: 1px solid transparent;
+  appearance: none;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.mac-select:hover {
+  background-color: var(--surface-hover);
+}
+
+.mac-select:focus {
+  outline: none;
+  border-color: rgba(0, 122, 255, 0.45);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+/* Primary Action Pill (inspired by Reference Image 1 "collect" button) */
+.mac-primary-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 20px;
+  border-radius: var(--radius-capsule);
+  background: #111113;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mac-primary-pill:hover {
+  background: #242426;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Subtle Section Header (inspired by Reference Image 2) */
+.mac-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  letter-spacing: -0.01em;
+}
+
+/* Streak Capsule Slot (inspired by Reference Image 1 days S M T W T F) */
+.finger-slot-capsule {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px;
+  border-radius: 12px;
+  background: var(--surface-inset);
+  border: 1px solid transparent;
+  min-height: 68px;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.finger-slot-capsule.active {
+  background: #ffffff;
+  border-color: rgba(52, 199, 89, 0.35);
+  box-shadow: 
+    0 6px 16px rgba(52, 199, 89, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Green dot / active indicator */
+.indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--apple-green);
+  box-shadow: 0 0 8px var(--apple-green-glow);
+}
+
+/* Hide Next.js dev indicator badge */
+nextjs-portal,
+[data-nextjs-toast],
+#nextjs-dev-tools,
+button[aria-label*="Next.js"] {
+  display: none !important;
+}
+
+/* ─── Scrollbars — refined macOS style ─── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
-
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 243, 255, 0.3);
-  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 243, 255, 0.5);
+/* ─── Subtle Keyframe Animations ─── */
+@layer utilities {
+  @keyframes spin-slow { to { transform: rotate(360deg); } }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0);   }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+  .animate-fade-up   { animation: fade-up 0.18s ease-out forwards; }
+  .animate-blink     { animation: blink 2s ease-in-out infinite; }
+  .animate-spin-slow { animation: spin-slow 1s linear infinite; }
 }

@@ -3,19 +3,15 @@
 import { useState } from 'react';
 import { useHandTracking } from '@/hooks/useHandTracking';
 import { CameraFeed } from '@/components/CameraFeed';
-import { ChordDisplay } from '@/components/ChordDisplay';
 import { NoteDisplay } from '@/components/NoteDisplay';
 import { MappingLegend } from '@/components/MappingLegend';
 import { SettingsPanel } from '@/components/SettingsPanel';
-import { BackgroundEffect } from '@/components/BackgroundEffect';
 import { AudioControl } from '@/components/AudioControl';
-import { Music2, Sparkles, Activity } from 'lucide-react';
-
 import { CircularDialHUD } from '@/components/CircularDialHUD';
-
 import { SitarBackground } from '@/components/SitarBackground';
 import { ViolinBackground } from '@/components/ViolinBackground';
 import { getThemeConfig } from '@/lib/theme';
+import { Music2 } from 'lucide-react';
 
 export default function Home() {
   const {
@@ -39,114 +35,240 @@ export default function Home() {
   const theme = getThemeConfig(settings.instrumentId);
   const isSitar = settings.instrumentId === 'sitar';
   const isViolin = settings.instrumentId === 'violin';
+  const isCircular = settings.inputMode === 'circular-keyboard';
 
   return (
-    <main className={`relative min-h-screen text-slate-100 font-sans transition-colors duration-700 ease-in-out ${theme.bgColor} overflow-x-hidden selection:bg-amber-500 selection:text-black pb-12`}>
-      {/* Background Particle & Mesh Animation */}
-      <BackgroundEffect />
-
-      {/* Sitar Classical Ambient & 3D Model Layer */}
+    <div
+      className="min-h-screen w-full flex items-center justify-center p-3 sm:p-5 lg:p-7"
+      style={{
+        background: 'var(--app-backdrop)',
+        color: 'var(--text-primary)',
+      }}
+    >
+      {/* Background instrument layers (subtle, non-interfering) */}
       <SitarBackground active={isSitar} activeNotesCount={activeNotes.length} />
-
-      {/* Western Classical Violin Symphony & Sheet Music Layer */}
       <ViolinBackground active={isViolin} />
 
-      {/* Main HUD Container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
-        {/* Header HUD Navigation */}
-        <header className={`relative z-50 flex flex-col lg:flex-row items-center justify-between gap-4 p-5 rounded-2xl transition-all duration-700 ease-in-out backdrop-blur-xl ${theme.headerBg} border ${theme.headerBorder} ${theme.headerGlow}`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-lg transition-all duration-700 ${
-              isSitar
-                ? 'bg-gradient-to-tr from-amber-600 via-rose-700 to-yellow-500 shadow-[0_0_20px_rgba(212,175,55,0.5)]'
-                : 'bg-gradient-to-tr from-cyan-500 via-violet-600 to-pink-500 shadow-[0_0_20px_rgba(0,243,255,0.4)]'
-            }`}>
-              <Music2 className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className={`text-xl sm:text-2xl font-black font-mono tracking-wider text-transparent bg-clip-text bg-gradient-to-r ${
-                  isSitar
-                    ? 'from-amber-200 via-amber-400 to-amber-100'
-                    : 'from-cyan-300 via-violet-200 to-pink-300'
-                }`}>
-                  CHORDTURE
-                </h1>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${
-                  isSitar
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                    : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
-                }`}>
-                  {isSitar ? '🪕 SITAR MODE' : 'v1.4 MULTI-MODE'}
-                </span>
-              </div>
-              <p className="text-xs text-slate-300 font-mono flex items-center gap-1.5 mt-0.5 opacity-90">
-                <Sparkles className={`w-3 h-3 ${isSitar ? 'text-amber-400' : 'text-cyan-400'}`} />
-                {isSitar ? 'Indian Classical Sitar Aesthetics & Polyphonic Sound Engine' : 'Real-Time Hand Gesture & Multi-Input Chord Music System'}
-              </p>
-            </div>
-          </div>
+      {/* ── Native macOS Creative Studio Window Shell (Inspired by Ref Image 2) ── */}
+      <div className="macos-window w-full max-w-[1600px] flex flex-col">
 
-          <div className="flex items-center gap-4">
-            <AudioControl
-              settings={settings}
-              mappingConfig={mappingConfig}
-              onUpdateSettings={updateSettings}
-              onUpdateMapping={updateMappingConfig}
-              onOpenSettings={() => setIsSettingsOpen(true)}
-            />
-          </div>
-        </header>
-
-        {/* Main Dashboard Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          {/* Left/Full Column: Camera Feed & In-Video Overlays */}
-          <div className={settings.inputMode === 'circular-keyboard' ? 'lg:col-span-12 space-y-4' : 'lg:col-span-8 space-y-4'}>
-            <CameraFeed
-              videoRef={videoRef}
-              canvasRef={canvasRef}
-              isLoading={isLoading}
-              error={error}
-              mirrorVideo={settings.mirrorVideo}
-              detectedHands={detectedHands}
-              chordResult={chordResult}
-              instrumentId={settings.instrumentId}
-              inputMode={settings.inputMode}
-              activeNote={activeNotes[0]?.note}
-              onRetry={refreshDevices}
-            />
-
-            {/* Quick Status / FPS Indicator Card */}
-            <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/50 border border-slate-800/80 backdrop-blur-md text-xs font-mono text-slate-400">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
-                <span>MediaPipe Tasks Vision WASM • 21 Landmarks</span>
-              </div>
-              <span className="text-cyan-400">FPS: ~60 (Native RAF)</span>
-            </div>
-          </div>
-
-          {/* Right Column: Sidebar (Hidden in Circular Dial Mode for full-width performance view) */}
-          {settings.inputMode !== 'circular-keyboard' && (
-            <div className="lg:col-span-4 space-y-4">
-              {/* Active Notes Matrix */}
-              <NoteDisplay activeNotes={activeNotes} instrumentId={settings.instrumentId} />
-
-              {/* Gesture Reference Legend */}
-              <MappingLegend
-                mappingConfig={mappingConfig}
-                detectedHands={detectedHands}
-                inputMode={settings.inputMode}
-                activeGestureId={activeGestureId}
-                capoFret={settings.capoFret}
-                instrumentId={settings.instrumentId}
+        {/* ── 1. macOS Window Header & Toolbar (56px) ── */}
+        <header
+          style={{
+            height: '56px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 20px',
+            borderBottom: '1px solid var(--separator)',
+            background: 'var(--window-bg)',
+            gap: '16px',
+            flexWrap: 'wrap',
+          }}
+        >
+          {/* Left: Window Chrome & App Identity */}
+          <div className="flex items-center gap-4 select-none">
+            {/* macOS Traffic Lights */}
+            <div className="flex items-center gap-2">
+              <span
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  background: 'var(--traffic-close)',
+                  display: 'inline-block',
+                }}
+              />
+              <span
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  background: 'var(--traffic-minimize)',
+                  display: 'inline-block',
+                }}
+              />
+              <span
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  background: 'var(--traffic-maximize)',
+                  display: 'inline-block',
+                }}
               />
             </div>
-          )}
-        </div>
+
+            <div style={{ width: '1px', height: '18px', background: 'var(--separator)' }} />
+
+            {/* App Brand & Instrument Badge */}
+            <div className="flex items-center gap-2.5">
+              <Music2 style={{ width: '16px', height: '16px', color: 'var(--text-primary)' }} />
+              <span
+                style={{
+                  fontSize: '14.5px',
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                Chordture
+              </span>
+              <span
+                style={{
+                  fontSize: '11.5px',
+                  fontWeight: 500,
+                  color: 'var(--text-secondary)',
+                  background: 'var(--surface-inset)',
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                }}
+              >
+                {theme.name}
+              </span>
+            </div>
+          </div>
+
+          {/* Right: Toolbar Controls */}
+          <AudioControl
+            settings={settings}
+            mappingConfig={mappingConfig}
+            onUpdateSettings={updateSettings}
+            onUpdateMapping={updateMappingConfig}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+          />
+        </header>
+
+        {/* ── 2. MAIN APPLICATION WORKSPACE (Camera ~75% + Inspector ~25%) ── */}
+        <main
+          className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_350px]"
+          style={{ minHeight: '580px' }}
+        >
+          {/* Left: Studio Camera Workspace Canvas */}
+          <div
+            style={{
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              background: '#f8f8fa',
+            }}
+          >
+            <div
+              className="w-full aspect-[4/3] sm:aspect-video"
+              style={{
+                maxHeight: 'calc(100vh - 240px)',
+                minHeight: '360px',
+              }}
+            >
+              <CameraFeed
+                videoRef={videoRef}
+                canvasRef={canvasRef}
+                isLoading={isLoading}
+                error={error}
+                mirrorVideo={settings.mirrorVideo}
+                detectedHands={detectedHands}
+                chordResult={chordResult}
+                instrumentId={settings.instrumentId}
+                inputMode={settings.inputMode}
+                activeNote={activeNotes[0]?.note}
+                onRetry={refreshDevices}
+              />
+            </div>
+          </div>
+
+          {/* Right: Integrated Studio Inspector Sidebar (Inspired by Ref Image 2) */}
+          <aside
+            style={{
+              width: '100%',
+              padding: '22px 20px',
+              borderLeft: '1px solid var(--separator)',
+              background: 'var(--sidebar-bg)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '22px',
+            }}
+          >
+            {/* Active Notes */}
+            <NoteDisplay
+              activeNotes={activeNotes}
+              instrumentId={settings.instrumentId}
+            />
+
+            <div style={{ height: '1px', background: 'var(--separator-subtle)' }} />
+
+            {/* Finger Mapping / Chords / Dial Guide */}
+            <MappingLegend
+              mappingConfig={mappingConfig}
+              detectedHands={detectedHands}
+              inputMode={settings.inputMode}
+              activeGestureId={activeGestureId}
+              capoFret={settings.capoFret}
+              instrumentId={settings.instrumentId}
+            />
+
+            {/* Circular Dial HUD in sidebar if in circular-keyboard mode */}
+            {isCircular && (
+              <>
+                <div style={{ height: '1px', background: 'var(--separator-subtle)' }} />
+                <CircularDialHUD
+                  activeNote={activeNotes[0]?.note}
+                  detectedHands={detectedHands}
+                  mirrorVideo={settings.mirrorVideo}
+                  instrumentId={settings.instrumentId}
+                />
+              </>
+            )}
+          </aside>
+        </main>
+
+        {/* ── 3. Integrated macOS Status Bar (34px) ── */}
+        <footer
+          style={{
+            height: '34px',
+            padding: '0 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '11px',
+            color: 'var(--text-tertiary)',
+            borderTop: '1px solid var(--separator)',
+            background: 'var(--window-bg)',
+          }}
+        >
+          {/* Tracking state */}
+          <div className="flex items-center gap-2">
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: detectedHands.length > 0 ? 'var(--apple-green)' : 'var(--apple-amber)',
+                boxShadow: detectedHands.length > 0 ? '0 0 6px var(--apple-green-glow)' : 'none',
+                display: 'inline-block',
+                flexShrink: 0,
+              }}
+              className={detectedHands.length === 0 ? 'animate-blink' : ''}
+            />
+            <span style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>
+              {detectedHands.length > 0
+                ? `Tracking Active (${detectedHands.length} hand${detectedHands.length > 1 ? 's' : ''})`
+                : 'Tracking Ready (Scanning)'}
+            </span>
+            <span style={{ color: 'var(--separator)' }}>•</span>
+            <span>MediaPipe Vision WASM</span>
+          </div>
+
+          {/* Performance & input metrics */}
+          <div className="flex items-center gap-3">
+            <span>21 Landmarks / hand</span>
+            <span style={{ color: 'var(--separator)' }}>•</span>
+            <span>~60 fps</span>
+          </div>
+        </footer>
       </div>
 
-      {/* Settings Modal */}
+      {/* Settings Modal Sheet */}
       <SettingsPanel
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
@@ -156,6 +278,6 @@ export default function Home() {
         onUpdateMapping={updateMappingConfig}
         onUpdateSettings={updateSettings}
       />
-    </main>
+    </div>
   );
 }

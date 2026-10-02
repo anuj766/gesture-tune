@@ -1,12 +1,11 @@
 'use client';
 
-import { Volume2, VolumeX, Sliders, ArrowLeftRight, Sparkles } from 'lucide-react';
+import { Volume2, VolumeX, Sliders, ArrowLeftRight } from 'lucide-react';
 import { AppSettings, NoteMappingConfig } from '@/types';
-import { audioSynth, PlayMode } from '@/lib/audioSynth';
+import { audioSynth } from '@/lib/audioSynth';
 import { PRESET_MAPPINGS } from '@/lib/noteMapping';
 
 import { InputModeSelector } from '@/components/InputModeSelector';
-
 import { INSTRUMENTS } from '@/lib/instruments/registry';
 
 interface AudioControlProps {
@@ -40,108 +39,96 @@ export function AudioControl({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2.5">
-      {/* Input Mode Selector Dropdown */}
+    <div className="flex items-center gap-2 flex-wrap">
+      {/* Input Mode Selector */}
       <InputModeSelector
         currentMode={settings.inputMode}
         onSelectMode={(modeId) => onUpdateSettings({ inputMode: modeId })}
       />
 
-      {/* Instrument Selection Dropdown (Piano vs Sitar) */}
-      <div className="relative">
+      {/* Instrument Select */}
+      <select
+        value={settings.instrumentId || 'piano'}
+        onChange={(e) => onUpdateSettings({ instrumentId: e.target.value })}
+        className="mac-select"
+        title="Select Instrument"
+      >
+        {INSTRUMENTS.map((inst) => (
+          <option key={inst.id} value={inst.id}>
+            {inst.name}
+          </option>
+        ))}
+      </select>
+
+      {/* Tuning / Scale Preset — finger mapping mode */}
+      {settings.inputMode === 'finger-mapping' && (
         <select
-          value={settings.instrumentId || 'piano'}
-          onChange={(e) => onUpdateSettings({ instrumentId: e.target.value })}
-          className="bg-slate-900/90 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-amber-400 cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.2)]"
-          title="Select Active Instrument Sound Library"
+          onChange={(e) => handlePresetSelect(Number(e.target.value))}
+          className="mac-select"
+          title="Tuning Scale Preset"
+          defaultValue={0}
         >
-          {INSTRUMENTS.map((inst) => (
-            <option key={inst.id} value={inst.id}>
-              {inst.icon} Instrument: {inst.name}
+          {PRESET_MAPPINGS.map((p, idx) => (
+            <option key={p.name} value={idx}>
+              Scale: {p.name}
             </option>
           ))}
         </select>
-      </div>
+      )}
 
-      {/* Guitar Capo Fret Selector (Exclusive to Gesture Mode) */}
+      {/* Capo selector — gesture mode only */}
       {settings.inputMode === 'gesture-mode' && (
-        <div className="relative">
-          <select
-            value={settings.capoFret || 0}
-            onChange={(e) => onUpdateSettings({ capoFret: Number(e.target.value) })}
-            className="bg-slate-900/90 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400 cursor-pointer shadow-[0_0_15px_rgba(52,211,153,0.2)]"
-            title="Guitar Capo Fret Transposition"
-          >
-            <option value={0}>🎸 Capo: 0 (No Capo)</option>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((fret) => (
-              <option key={`capo-${fret}`} value={fret}>
-                🎸 Capo Fret: {fret} (+{fret} semitones)
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          value={settings.capoFret || 0}
+          onChange={(e) => onUpdateSettings({ capoFret: Number(e.target.value) })}
+          className="mac-select"
+          title="Guitar Capo Fret Transposition"
+        >
+          <option value={0}>Capo: None</option>
+          {Array.from({ length: 12 }, (_, i) => i + 1).map((fret) => (
+            <option key={`capo-${fret}`} value={fret}>
+              Capo: Fret {fret}
+            </option>
+          ))}
+        </select>
       )}
 
-      {/* Song / Scale Presets Quick Dropdown (Visible in Finger Mapping mode) */}
-      {settings.inputMode === 'finger-mapping' && (
-        <div className="relative">
-          <select
-            onChange={(e) => handlePresetSelect(Number(e.target.value))}
-            className="bg-slate-900/90 text-cyan-300 border border-cyan-500/30 text-xs font-mono font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-400 cursor-pointer shadow-[0_0_15px_rgba(0,243,255,0.15)]"
-          >
-            {PRESET_MAPPINGS.map((p, idx) => (
-              <option key={p.name} value={idx}>
-                🎵 Preset: {p.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* Swap Left/Right Hands Quick Toggle */}
+      {/* Swap Hands */}
       <button
         onClick={() => onUpdateSettings({ swapHandedness: !settings.swapHandedness })}
-        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all border cursor-pointer ${
-          settings.swapHandedness
-            ? 'bg-amber-500/20 text-amber-300 border-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.25)]'
-            : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:text-white'
-        }`}
+        className={`mac-btn ${settings.swapHandedness ? 'active' : ''}`}
         title="Swap Left and Right Hand Assignments"
       >
-        <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400" />
-        <span>{settings.swapHandedness ? 'Hands Swapped' : 'Swap Hands'}</span>
+        <ArrowLeftRight style={{ width: '13px', height: '13px' }} />
+        <span>{settings.swapHandedness ? 'Inverted' : 'Swap'}</span>
       </button>
 
-      {/* Piano / Sound Toggle */}
+      {/* Sound Toggle */}
       <button
         onClick={handleToggleSound}
-        className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all border cursor-pointer ${
-          settings.soundEnabled
-            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50 shadow-[0_0_15px_rgba(52,211,153,0.3)]'
-            : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:text-slate-200'
-        }`}
-        title="Toggle Sound"
+        className={`mac-btn ${settings.soundEnabled ? 'active' : ''}`}
+        title="Toggle Audio Engine"
       >
         {settings.soundEnabled ? (
           <>
-            <Volume2 className="w-4 h-4 text-emerald-400 animate-pulse" />
-            <span>Sound ON</span>
+            <Volume2 style={{ width: '13px', height: '13px', color: 'var(--apple-green)' }} />
+            <span>Mute</span>
           </>
         ) : (
           <>
-            <VolumeX className="w-4 h-4 text-slate-500" />
-            <span>Sound Muted</span>
+            <VolumeX style={{ width: '13px', height: '13px', color: 'var(--text-tertiary)' }} />
+            <span>Unmute</span>
           </>
         )}
       </button>
 
-      {/* Settings Button */}
+      {/* Settings */}
       <button
         onClick={onOpenSettings}
-        className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono font-bold bg-slate-900/80 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 transition-all cursor-pointer shadow-[0_0_15px_rgba(0,243,255,0.15)]"
-        title="Open HUD Settings"
+        className="mac-btn"
+        title="Open Audio & Camera Settings"
       >
-        <Sliders className="w-4 h-4 text-cyan-400" />
+        <Sliders style={{ width: '13px', height: '13px' }} />
         <span>Settings</span>
       </button>
     </div>
